@@ -641,7 +641,7 @@ describe Article do
 
       merged_article = article1.merge_with('2')
       merged_article_content = merged_article.body
-      expected_merged_content = article1.body + '<br />' + article2.body
+      expected_merged_content = article1.body + '\n\n' + article2.body
       expected_merged_content.should === merged_article_content
 
       post :merge, :id => 2

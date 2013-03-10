@@ -122,10 +122,10 @@ class Article < Content
 
   end
 
-  def merge_with(article_id)
+  def merge_with(other_article_id)
     # get both articles
     article1 = self
-    article2 = Article.find_by_id(article_id)
+    article2 = Article.find_by_id(other_article_id)
 
     # create a new article
     new_article = Article.get_or_build_article
@@ -133,7 +133,7 @@ class Article < Content
     new_article.title = article1.title
 
     # add a blank line between text of two merged articles
-    new_article.body = article1.body + '<br />' + article2.body
+    new_article.body = article1.body + '\n\n' + article2.body
     new_article.author = article1.author
     new_article.published = true
     new_article.allow_pings = true
@@ -153,7 +153,7 @@ class Article < Content
     end
 
     if article2.allow_comments
-      article_comments = Comment.find(:all, :conditions => { :article_id => article_id })
+      article_comments = Comment.find(:all, :conditions => { :article_id => other_article_id })
       if !article_comments.nil?
         for comment in article_comments
           #update article_id to new one
