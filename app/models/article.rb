@@ -122,6 +122,56 @@ class Article < Content
 
   end
 
+  def merge_with(article_id)
+    # get both articles
+    article1 = self
+    article2 = Article.find_by_id(article_id)
+
+    # create a new article
+    new_article = Article.get_or_build_article
+    new_article.user_id = article1.user_id
+    new_article.title = article1.title
+
+    # add a blank line between text of two merged articles
+    new_article.body = article1.body + '<br />' + article2.body
+    new_article.author = article1.author
+    new_article.published = true
+    new_article.allow_pings = true
+    new_article.state = "published"
+
+    # save the new article
+    new_article.save
+
+    if article1.allow_comments
+      article_comments = Comment.find(:all, :conditions => { :article_id => article1.id })
+      if !article_comments.nil?
+        for comment in article_comments
+          #update article_id to new one
+          comment.update_attribute(:article_id, new_article.id)
+        end
+      end
+    end
+
+    if article2.allow_comments
+      article_comments = Comment.find(:all, :conditions => { :article_id => article_id })
+      if !article_comments.nil?
+        for comment in article_comments
+          #update article_id to new one
+          comment.update_attribute(:article_id, new_article.id)
+        end
+      end
+    end
+
+    # save new article
+    new_article.save
+
+    # destroy old articles and its comments
+    article1.destroy
+    article2.destroy
+
+    return new_article
+  end
+
   def year_url
     published_at.year.to_s
   end

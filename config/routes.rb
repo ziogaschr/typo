@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   match ':year', :to => 'articles#index', :year => /\d{4}/, :as => 'articles_by_year', :format => false
   match ':year/page/:page', :to => 'articles#index', :year => /\d{4}/, :as => 'articles_by_year_page', :format => false
 
+  match 'admin/content/merge/:current', :to => 'admin/content#merge', :as => 'merge'
   match 'admin', :to  => 'admin/dashboard#index', :format => false, :as => :admin_dashboard
 
   match 'articles.:format', :to => 'articles#index', :constraints => {:format => 'rss'}, :as => 'rss'

@@ -628,7 +628,31 @@ describe Article do
         article.should be == already_exist_article
       end
     end
+  end
 
+  describe 'merge two articles' do
+    it 'should return a new merged article with concatanated text of both articles' do
+      article1 = Article.get_or_build_article
+      article2 = Article.get_or_build_article
+      mock_article1 = mock('Article')
+      mock_article1.stub(:id).and_return('1')
+      mock_article2 = mock('Article')
+      mock_article2.stub(:id).and_return('2')
+
+      merged_article = article1.merge_with('2')
+      merged_article_content = merged_article.body
+      expected_merged_content = article1.body + '<br />' + article2.body
+      expected_merged_content.should === merged_article_content
+
+      post :merge, :id => 2
+    end
+
+    it 'should return a new merged article with only one author' do
+      article1 = Factory(:article, :author => 'Rohit', :id => 1)
+      article2 = Factory(:article, :author => 'Avneesh', :id => 2)
+      merged_article = article1.merge_with(article2.id)
+      merged_author = merged_article.author
+      merged_author.should == article1.author or merged_author.should == article2.author
+    end
   end
 end
-

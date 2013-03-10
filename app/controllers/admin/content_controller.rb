@@ -24,11 +24,13 @@ class Admin::ContentController < Admin::BaseController
   end
 
   def new
+    @is_edit = false
     new_or_edit
   end
 
   def edit
     @article = Article.find(params[:id])
+    @is_edit = true
     unless @article.access_by? current_user
       redirect_to :action => 'index'
       flash[:error] = _("Error, you are not allowed to perform this action")
@@ -113,6 +115,21 @@ class Admin::ContentController < Admin::BaseController
     render :text => nil
   end
 
+  def merge
+    @current_user = User.find_by_id(session['user_id'].to_i)
+    if @current_user.admin?
+      puts params[:current_article_id].to_i
+      puts params[:merge_with][:id].to_i
+      article = Article.find_by_id(params[:current_article_id].to_i)
+
+      # action -> merge the articles
+      article.merge_with((params[:merge_with])[:id].to_i)
+      redirect_to :action => 'index'
+    else
+      flash[:error] = "You are not an admin"
+    end
+  end
+
   protected
 
   def get_fresh_or_existing_draft_for_article
@@ -145,6 +162,7 @@ class Admin::ContentController < Admin::BaseController
     @article = Article.get_or_build_article(id)
     @article.text_filter = current_user.text_filter if current_user.simple_editor?
 
+    @idOfCurrentArticle = @article.id
     @post_types = PostType.find(:all)
     if request.post?
       if params[:article][:draft]
@@ -180,6 +198,7 @@ class Admin::ContentController < Admin::BaseController
     @images = Resource.images_by_created_at.page(params[:page]).per(10)
     @resources = Resource.without_images_by_filename
     @macros = TextFilter.macro_filters
+    @current_user = User.find_by_id(session['user_id'].to_i)
     render 'new'
   end
 
